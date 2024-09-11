@@ -1,30 +1,46 @@
-using Unity.VisualScripting;
 using UnityEngine;
 
+[RequireComponent(typeof(BoxCollider2D))]
+[RequireComponent(typeof(Rigidbody2D))]
 public class PlayerController : MonoBehaviour
 {
 	#region Variables
 
 	[Header("*** Components ***")]
-	
     [SerializeField] Rigidbody2D rb;
 
 	[Header("*** Movement Values ***")]
+	//[SerializeField] private InputActionReference movement;
 
     [SerializeField] float maxSpeed = 5f;
 	[SerializeField] private float smoothFactor = 0.5f;
 
+	private Vector2 movementDirection;
 	private Vector2 targetVelocity;
 	private Vector2 currentVelocity;
+
 	#endregion
 
 
-	void Update() {
+	void FixedUpdate() {
+		if (DialogueManager.GetInstance().dialogueIsPlaying) {
+			return;
+		}
 		Movement();
 	}
 
-	
-	private void Movement() {
+
+	//private void OnEnable() {
+	//	// Enable the movement input action when the script is enabled
+	//	movement.action.Enable();
+	//}
+	//private void OnDisable() {
+	//	// Disable the movement input action when the script is disabled
+	//	movement.action.Disable();
+	//}
+
+	public void Movement() {
+		#region Old Input System
 		Vector2 input = new Vector2(
 			Input.GetAxisRaw("Horizontal"),
 			Input.GetAxisRaw("Vertical")
@@ -38,5 +54,44 @@ public class PlayerController : MonoBehaviour
 		if (input.magnitude == 0f) {
 			rb.velocity = Vector2.zero;
 		}
+		#endregion
+
+		#region New Input System
+
+		//movementDirection = movement.action.ReadValue<Vector2>();
+
+		////print(movementDirection);
+
+		//targetVelocity = new Vector2(movementDirection.x * maxSpeed, movementDirection.y * maxSpeed);
+
+		//currentVelocity = Vector2.Lerp(currentVelocity, targetVelocity, smoothFactor * Time.deltaTime);
+
+		//rb.velocity = targetVelocity;
+
+		//// Stop movement when there's no input
+		//if (movementDirection.magnitude == 0f) {
+		//	rb.velocity = Vector2.zero;
+		//}
+
+		#endregion
+
+		#region New Input System 2
+
+		//movementDirection = InputManager.GetInstance().GetMoveDirection();
+
+		////print(movementDirection);
+
+		//targetVelocity = movementDirection * maxSpeed;
+
+		////currentVelocity = Vector2.Lerp(currentVelocity, targetVelocity, smoothFactor * Time.deltaTime);
+		//rb.velocity = Vector2.Lerp(rb.velocity, targetVelocity, smoothFactor);
+		////rb.velocity = targetVelocity;
+
+		//// Stop movement when there's no input
+		//if (movementDirection.magnitude == 0f) {
+		//	rb.velocity = Vector2.zero;
+		//}
+
+		#endregion
 	}
 }

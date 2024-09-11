@@ -5,7 +5,7 @@ public class CursorFollow : MonoBehaviour {
 	[Header("*** Vars ***")]
 	[SerializeField] Transform cursorFollow;
 	[SerializeField] Transform player;
-	[SerializeField] float threshold = 5f; 
+	[SerializeField] float threshold = 5f;
 
 	private void Update() {
 		FollowCursor();
