@@ -47,13 +47,6 @@ public class DialogueManager : MonoBehaviour {
 	}
 	#endregion
 
-	#region Story Tags
-	private const string SPEAKER_TAG = "speaker";
-	private const string PORTRAIT_TAG = "portrait";
-	private const string LAYOUT_TAG = "layout";
-	#endregion
-
-	
 	private void Start() {
 		dialogueIsPlaying = false;
 		dialoguePanel.SetActive(false);
@@ -69,6 +62,12 @@ public class DialogueManager : MonoBehaviour {
 		SkipTypingEffect();
 		SkipLine();
 	}
+
+	#region Story Tags
+	private const string SPEAKER_TAG = "speaker";
+	private const string PORTRAIT_TAG = "portrait";
+	private const string LAYOUT_TAG = "layout";
+	#endregion
 
 	#region Dialogue Mode
 	/// <summary>
@@ -130,16 +129,29 @@ public class DialogueManager : MonoBehaviour {
 
 		StartCoroutine(CanSkip());
 
+		bool isAddingRichTextTag = false;
+
 		foreach (char letter in line.ToCharArray()) {
 			if (submitSkip) {
-
-				print("Skipped");
 				submitSkip = false;
 				dialogueText.text = line;
 				break;
 			}
-			dialogueText.text += letter;
-			yield return new WaitForSeconds(typingSpeed);
+
+			// check for rich text tag, add it immediatly
+			if (letter == '<' || isAddingRichTextTag) {
+				isAddingRichTextTag = true;
+				dialogueText.text += letter;
+				if (letter == '>' ) {
+					isAddingRichTextTag = false;
+				}
+			} else {
+				dialogueText.text += letter;
+				yield return new WaitForSeconds(typingSpeed);
+			}
+
+
+			
 		}
 
 		continueIcon.SetActive(true);
