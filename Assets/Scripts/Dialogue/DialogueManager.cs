@@ -57,37 +57,18 @@ public class DialogueManager : MonoBehaviour {
 	private void Start() {
 		dialogueIsPlaying = false;
 		dialoguePanel.SetActive(false);
-
-
-		choicesText = new TextMeshProUGUI[choices.Length];
-		int index = 0;
-		foreach (var choice in choices) {
-			choicesText[index] = choice.GetComponentInChildren<TextMeshProUGUI>();
-			index++;
-		}
-}
+		AssignChoices();
+	}
 
 	private void Update() {
 		// if dialogue is not playing don't proccess further
 		if (!dialogueIsPlaying) {
 			return;
 		}
-		if (canSkip && Input.GetKeyDown(KeyCode.Return)) {
-			submitSkip = true;
-		}
 
-		// if dialogue is active, can move on the next line and nothing to answer on ENTER key Continue story,
-		if (canContinueToNextLine && currentStory.currentChoices.Count == 0 && Input.GetKeyDown(KeyCode.Return)) {
-			ContinueStory();
-		}
+		SkipTypingEffect();
+		SkipLine();
 	}
-
-	private IEnumerator CanSkip() {
-		canSkip = false; //Making sure the variable is false.
-		yield return new WaitForSeconds(0.1f); ;
-		canSkip = true;
-	}
-
 
 	#region Dialogue Mode
 	/// <summary>
@@ -150,7 +131,9 @@ public class DialogueManager : MonoBehaviour {
 		StartCoroutine(CanSkip());
 
 		foreach (char letter in line.ToCharArray()) {
-			if (canSkip && submitSkip && Input.GetKeyDown(KeyCode.Return)) {
+			if (submitSkip) {
+
+				print("Skipped");
 				submitSkip = false;
 				dialogueText.text = line;
 				break;
@@ -168,6 +151,25 @@ public class DialogueManager : MonoBehaviour {
 		canSkip = false;
 	}
 
+	private IEnumerator CanSkip() {
+		canSkip = false; //Making sure the variable is false.
+		yield return null;
+		canSkip = true;
+	}
+
+	private void SkipTypingEffect() {
+		if (Input.GetKeyDown(KeyCode.Return)) {
+			submitSkip = true;
+		}
+	}
+
+	private void SkipLine() {
+		// if dialogue is active, can move on the next line and nothing to answer on ENTER key Continue story,
+		if (canContinueToNextLine && currentStory.currentChoices.Count == 0 && Input.GetKeyDown(KeyCode.Return)) {
+			submitSkip = false;
+			ContinueStory();
+		}
+	}
 	#endregion
 
 	#region Tag settings
@@ -278,9 +280,31 @@ public class DialogueManager : MonoBehaviour {
 		if (canContinueToNextLine) {
 			currentStory.ChooseChoiceIndex(choiceIndex);
 			//Input.GetKeyDown(KeyCode.Return);
+
+			// Helps to detect twice return key
+			StartCoroutine(DelayBeforeNextLine());
+
 			ContinueStory();
 		}
 		
 	}
+
+	private IEnumerator DelayBeforeNextLine() {
+		yield return new WaitForEndOfFrame();  // Wait for one frame before re-enabling skipping
+		submitSkip = false;
+	}
+
+	/// <summary>
+	/// Calling this in the start
+	/// </summary>
+	private void AssignChoices() {
+		choicesText = new TextMeshProUGUI[choices.Length];
+		int index = 0;
+		foreach (var choice in choices) {
+			choicesText[index] = choice.GetComponentInChildren<TextMeshProUGUI>();
+			index++;
+		}
+	}
+
 	#endregion
 }
