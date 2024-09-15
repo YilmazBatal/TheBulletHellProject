@@ -24,6 +24,7 @@ public class PlayerController : MonoBehaviour
 
 	void FixedUpdate() {
 		if (DialogueManager.GetInstance().dialogueIsPlaying) {
+			rb.velocity = Vector2.zero; // to prevent glitch
 			return;
 		}
 		Movement();

@@ -6,6 +6,7 @@ public class DetectNPC : MonoBehaviour
 
 	[Header("Collider")]
 	[SerializeField] CircleCollider2D playerCollider;
+	[SerializeField] Rigidbody2D rb;
 
 	GameObject currentNpcScript;
 	GameObject currentNpcCue;
@@ -25,6 +26,7 @@ public class DetectNPC : MonoBehaviour
 				
 				if (Input.GetKeyDown(KeyCode.E) && currentNpcScript.GetComponent<DialogueTrigger>().inkJSON != null) {
 					DialogueManager.GetInstance().EnterDialogueMode(currentNpcScript.GetComponent<DialogueTrigger>().inkJSON);
+					
 				}
 			}
 		}
