@@ -30,22 +30,19 @@ public class PlayerController : MonoBehaviour
 		Movement();
 	}
 
-
-	//private void OnEnable() {
-	//	// Enable the movement input action when the script is enabled
-	//	movement.action.Enable();
-	//}
-	//private void OnDisable() {
-	//	// Disable the movement input action when the script is disabled
-	//	movement.action.Disable();
-	//}
-
 	public void Movement() {
 		#region Old Input System
 		Vector2 input = new Vector2(
 			Input.GetAxisRaw("Horizontal"),
 			Input.GetAxisRaw("Vertical")
 		).normalized;
+
+		if (Input.GetKeyDown(KeyCode.LeftShift)) {
+			maxSpeed = maxSpeed/2;
+		}
+		else {
+			maxSpeed = 5f;
+		}
 
 		targetVelocity = input * maxSpeed;
 		currentVelocity = Vector2.Lerp(currentVelocity, targetVelocity, smoothFactor);
