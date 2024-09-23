@@ -30,10 +30,16 @@ public class EnemyController : MonoBehaviour {
 	[SerializeField] float enemySpeed = 2.5f;
 	[SerializeField] float alertSize = 2f;
 	[SerializeField] float alertTime = 0.5f;
-	bool isMoving = false;
-	bool didAlertPopUp = false;
-	bool backToPatrol = false;
-	bool didRunAway = false;
+	[SerializeField] float attackOffSet = 1f;
+	private bool isMoving = false;
+	private bool didAlertPopUp = false;
+
+	// Bullet Settings
+	[Header("Bullet Settings")]
+	[SerializeField] GameObject bulletPrefab;
+	[SerializeField] float bulletSpeed = 5f;
+	[SerializeField] float bulletCooldown = 3f;
+	private bool readyToShoot = false;
 
 	// Coroutines
 	private Coroutine patrolCoroutine;
@@ -48,10 +54,13 @@ public class EnemyController : MonoBehaviour {
 
 	#endregion
 
+	private void Awake() {
+		radiusCenter = transform.position;
+	}
+	
 	private void Start() {
 		DefineComponents();
 
-		radiusCenter = transform.position;
 		enemyState = EnemyState.Idle;
 		playerAlert.SetActive(false);
 	}
@@ -65,32 +74,35 @@ public class EnemyController : MonoBehaviour {
 	}
 
 	private void Update() {
-		float distanceToPlayerFromCenter = Vector2.Distance(player.transform.position, radiusCenter);
+		// Set Enemy State
+		StateModifier();
 
-		StateModifier(distanceToPlayerFromCenter);
-
+		// Start the Coroutines according to Enemy State
 		if (enemyState == EnemyState.Idle) {
 			if (pursueCoroutine != null) {
 				StopCoroutine(pursueCoroutine);
 				pursueCoroutine = null;
 			}
-
-			if (patrolCoroutine == null) {
+			if (patrolCoroutine == null)
 				patrolCoroutine = StartCoroutine(Patrolling()); // Cache and start patrolling
-			}
-		} else if (enemyState == EnemyState.Pursuing) {
+		}
+		else if (enemyState == EnemyState.Pursuing) {
 			if (patrolCoroutine != null) {
 				StopCoroutine(patrolCoroutine);
 				patrolCoroutine = null;
 			}
-
-			if (pursueCoroutine == null) {
+			if (pursueCoroutine == null)
 				pursueCoroutine = StartCoroutine(Pursuing()); // Cache and start pursuing
-			}
 		}
 	}
 
-	private void StateModifier(float distanceToPlayerFromCenter) {
+	float GetDistanceFromCenter(Transform entity) {
+		return Vector2.Distance(entity.position, radiusCenter);
+	}
+
+	void StateModifier() {
+		float distanceToPlayerFromCenter = GetDistanceFromCenter(player.transform);
+
 		if (distanceToPlayerFromCenter <= patrolRadius) {
 			enemyState = EnemyState.Pursuing;
 		}
@@ -109,8 +121,9 @@ public class EnemyController : MonoBehaviour {
 		Debug.LogWarning(enemyState.ToString());
 	}
 
-	private IEnumerator ShowPlayerAlert() {
+	IEnumerator ShowPlayerAlert() {
 		if (!didAlertPopUp) {
+			didAlertPopUp = true;
 			playerAlert.SetActive(true);
 			playerAlert.GetComponent<Animator>().Play("EnemyAlert");
 			yield return new WaitForSeconds(0.51f); // 0.3s animation
@@ -119,22 +132,15 @@ public class EnemyController : MonoBehaviour {
 		}
 	}
 
-
 	IEnumerator Patrolling() {
-		print("im in patrol");
-
 		while (true) {
-			print("HELLOOO");
-
 			if (isReadyToNextPatrol) {
-				print("looking for new places to go");
-
 				isReadyToNextPatrol = false;
-				float distanceToCenterFromEnemy = Vector2.Distance(radiusCenter, gameObject.transform.position);
 
+				float distanceToCenterFromEnemy = GetDistanceFromCenter(transform);
+
+				// Back to patrol zone
 				if (distanceToCenterFromEnemy >= patrolRadius) {
-					print("im trying to go back	but cant");
-
 					rb.velocity = Vector2.zero;
 					yield return new WaitForSeconds(1f);
 					sr.flipX = !sr.flipX;
@@ -147,99 +153,115 @@ public class EnemyController : MonoBehaviour {
 					Vector2 targetPos = radiusCenter;
 					Vector2 direction = (targetPos - (Vector2)transform.position).normalized;
 
-					// Flip the enemy by cheking target pos
-					sr.flipX = targetPos.x < transform.position.x;
+					FlipSprite(targetPos);
 
-					// Walk 'till you reach with offset
 					while (Vector2.Distance(transform.position, targetPos) > 0.1f) {
-						isMoving = true;
-						animator.SetBool("isMoving", isMoving);
-						rb.velocity = direction * enemySpeed; // Set the velocity
-						yield return null; // Wait until the next frame
-						print("HELLOOO 1");
-
+						MoveToTarget(direction); yield return null; // Wait until the next frame
 					}
 
-					// Stop once you reach
-					rb.velocity = Vector2.zero;
-					isMoving = false;
-					animator.SetBool("isMoving", isMoving);
+					StopMoving();
 
 					// patrol timing
 					patrollingTime = Random.Range(minPatrol, maxPatrol);
 					yield return new WaitForSeconds(patrollingTime);
 				}
-				else {
-					print("what am i doing here");
+				// Already in patrol zone
+				else { 
 
-					// Determine the target pos and direction
-					Vector2 targetPos = Random.insideUnitCircle * patrolRadius;
+					Vector2 targetPos = radiusCenter + (Random.insideUnitCircle * patrolRadius);
 					Vector2 direction = (targetPos - (Vector2)transform.position).normalized;
+					
+					FlipSprite(targetPos);
 
-					// Flip the enemy by cheking target pos
-					sr.flipX = targetPos.x < transform.position.x;
-
-
-					// Walk 'till you reach with offset
 					while (Vector2.Distance(transform.position, targetPos) > 0.1f) {
-						isMoving = true;
-						animator.SetBool("isMoving", isMoving);
-						rb.velocity = direction * enemySpeed; // Set the velocity
-						yield return null; // Wait until the next frame
-						print("HELLOOO 2");
+						MoveToTarget(direction); yield return null; // Wait until the next frame
 					}
 
-					// Stop once you reach
-					rb.velocity = Vector2.zero;
-					isMoving = false;
-					animator.SetBool("isMoving", isMoving);
+					StopMoving();
 
 					// patrol timing
 					patrollingTime = Random.Range(minPatrol, maxPatrol);
 					yield return new WaitForSeconds(patrollingTime);
 				}
-					
-
 			}
+			didAlertPopUp = false;
 			isReadyToNextPatrol = true;
-			 
 			yield return null;
 		}
 	}
 
 	IEnumerator Pursuing() {
-		print("im pursuing");
-
 		while (enemyState == EnemyState.Pursuing) {
+
+			StartCoroutine(ShowPlayerAlert());
+
 			// Determine the target pos and direction
 			Vector2 targetPos = player.transform.position;
 			Vector2 direction = (targetPos - (Vector2)transform.position).normalized;
 
-			// Flip the enemy by cheking target pos
-			sr.flipX = targetPos.x < transform.position.x;
+			FlipSprite(targetPos);
 
-			// Walk 'till you reach with offset
-			isMoving = true;
-			animator.SetBool("isMoving", isMoving);
-			rb.velocity = direction * enemySpeed; // Set the velocity
+			// Check if the enemy is within the attack offset distance
+			if (Vector2.Distance(transform.position, targetPos) > attackOffSet) {
+				// Continue moving towards the player
+				MoveToTarget(direction);
+			}
+			else {
+				readyToShoot = true;
+				// Stop moving and shoot
+				StopMoving();
+				yield return StartCoroutine(ShootBullet()); // Wait for the bullet shooting to finish
 
-			//pursueCoroutine = null;
-			
+				// Resume moving after shooting
+				yield return new WaitForSeconds(0.5f); // Optional: Add a short delay after shooting
+			}
+
 			yield return null;
 		}
 
+		StopMoving();
+	}
+
+	IEnumerator ShootBullet() {
+		if (readyToShoot) {
+			readyToShoot = false;
+
+			GameObject bullet = Instantiate(bulletPrefab, transform.position, Quaternion.identity);
+			Vector2 bulletDirection = (player.transform.position - transform.position).normalized;
+
+			bullet.GetComponent<Rigidbody2D>().velocity = bulletDirection * bulletSpeed;
+
+			bullet.name = "Bullet";
+
+			yield return new WaitForSeconds(bulletCooldown);
+
+			readyToShoot = true;
+		}
+	}
+
+	private void FlipSprite(Vector2 targetPos) {
+		// Flip the enemy by cheking target pos
+		sr.flipX = targetPos.x < transform.position.x;
+	}
+
+	private void StopMoving() {
 		// Stop once you reach
 		rb.velocity = Vector2.zero;
 		isMoving = false;
 		animator.SetBool("isMoving", isMoving);
-
 	}
 
-	private void OnDrawGizmos() {
-		Gizmos.color = new Color(0.95f, 0.1f, 0.1f);
+	private void MoveToTarget(Vector2 direction) {
+		isMoving = true;
+		animator.SetBool("isMoving", isMoving);
+		rb.velocity = direction * enemySpeed; // Set the velocity
+	}
+
+	void OnDrawGizmosSelected() {
+		Gizmos.color = new Color(0.9f, 0.2f, 0.2f, 0.5f);
 		Gizmos.DrawWireSphere(radiusCenter, patrolRadius);
 
-		Gizmos.color = new Color(0.95f, 0.35f, 0.35f);
+		Gizmos.color = new Color(0.9f, 0.4f, 0.4f, 0.5f);
 		Gizmos.DrawWireSphere(radiusCenter, pursuingRadius);
 	}
 }
