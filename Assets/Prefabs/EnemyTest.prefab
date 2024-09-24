@@ -204,9 +204,9 @@ GameObject:
   - component: {fileID: 6287474106242343807}
   - component: {fileID: 892611706766244034}
   - component: {fileID: 7165575709822839662}
-  m_Layer: 0
+  m_Layer: 8
   m_Name: EnemyTest
-  m_TagString: Untagged
+  m_TagString: Enemy
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -392,3 +392,7 @@ MonoBehaviour:
   enemySpeed: 2.5
   alertSize: 3
   alertTime: 0.25
+  attackOffSet: 3
+  bulletPrefab: {fileID: 538378091599737335, guid: c6b5949f485386a40b20b62a13417d71, type: 3}
+  bulletSpeed: 8
+  bulletCooldown: 0.3

@@ -13,6 +13,7 @@ public class PlayerController : MonoBehaviour
 	//[SerializeField] private InputActionReference movement;
 
     [SerializeField] float maxSpeed = 5f;
+    [SerializeField] float currentSpeed;
 	[SerializeField] private float smoothFactor = 0.5f;
 
 	private Vector2 movementDirection;
@@ -20,7 +21,7 @@ public class PlayerController : MonoBehaviour
 	private Vector2 currentVelocity;
 
 	#endregion
-
+	
 
 	void FixedUpdate() {
 		if (DialogueManager.GetInstance().dialogueIsPlaying) {
@@ -37,14 +38,14 @@ public class PlayerController : MonoBehaviour
 			Input.GetAxisRaw("Vertical")
 		).normalized;
 
-		if (Input.GetKeyDown(KeyCode.LeftShift)) {
-			maxSpeed = maxSpeed/2;
+		if (Input.GetKey(KeyCode.LeftShift)) {
+			currentSpeed = maxSpeed/2;
 		}
 		else {
-			maxSpeed = 5f;
+			currentSpeed = maxSpeed;
 		}
 
-		targetVelocity = input * maxSpeed;
+		targetVelocity = input * currentSpeed;
 		currentVelocity = Vector2.Lerp(currentVelocity, targetVelocity, smoothFactor);
 
 		rb.velocity = currentVelocity;
@@ -52,44 +53,6 @@ public class PlayerController : MonoBehaviour
 		if (input.magnitude == 0f) {
 			rb.velocity = Vector2.zero;
 		}
-		#endregion
-
-		#region New Input System
-
-		//movementDirection = movement.action.ReadValue<Vector2>();
-
-		////print(movementDirection);
-
-		//targetVelocity = new Vector2(movementDirection.x * maxSpeed, movementDirection.y * maxSpeed);
-
-		//currentVelocity = Vector2.Lerp(currentVelocity, targetVelocity, smoothFactor * Time.deltaTime);
-
-		//rb.velocity = targetVelocity;
-
-		//// Stop movement when there's no input
-		//if (movementDirection.magnitude == 0f) {
-		//	rb.velocity = Vector2.zero;
-		//}
-
-		#endregion
-
-		#region New Input System 2
-
-		//movementDirection = InputManager.GetInstance().GetMoveDirection();
-
-		////print(movementDirection);
-
-		//targetVelocity = movementDirection * maxSpeed;
-
-		////currentVelocity = Vector2.Lerp(currentVelocity, targetVelocity, smoothFactor * Time.deltaTime);
-		//rb.velocity = Vector2.Lerp(rb.velocity, targetVelocity, smoothFactor);
-		////rb.velocity = targetVelocity;
-
-		//// Stop movement when there's no input
-		//if (movementDirection.magnitude == 0f) {
-		//	rb.velocity = Vector2.zero;
-		//}
-
 		#endregion
 	}
 }

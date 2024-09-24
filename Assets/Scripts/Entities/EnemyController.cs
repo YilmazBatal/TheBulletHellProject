@@ -30,15 +30,16 @@ public class EnemyController : MonoBehaviour {
 	[SerializeField] float enemySpeed = 2.5f;
 	[SerializeField] float alertSize = 2f;
 	[SerializeField] float alertTime = 0.5f;
-	[SerializeField] float attackOffSet = 1f;
+	[SerializeField] float attackOffSet = 3f;
+	[SerializeField] float bulletPositionOffSet = -1f;
 	private bool isMoving = false;
 	private bool didAlertPopUp = false;
 
 	// Bullet Settings
 	[Header("Bullet Settings")]
 	[SerializeField] GameObject bulletPrefab;
-	[SerializeField] float bulletSpeed = 5f;
-	[SerializeField] float bulletCooldown = 3f;
+	[SerializeField] float bulletSpeed = 10f;
+	[SerializeField] float bulletCooldown = 1.3f;
 	private bool readyToShoot = false;
 
 	// Coroutines
@@ -208,12 +209,9 @@ public class EnemyController : MonoBehaviour {
 			}
 			else {
 				readyToShoot = true;
-				// Stop moving and shoot
+
 				StopMoving();
 				yield return StartCoroutine(ShootBullet()); // Wait for the bullet shooting to finish
-
-				// Resume moving after shooting
-				yield return new WaitForSeconds(0.5f); // Optional: Add a short delay after shooting
 			}
 
 			yield return null;
@@ -225,18 +223,36 @@ public class EnemyController : MonoBehaviour {
 	IEnumerator ShootBullet() {
 		if (readyToShoot) {
 			readyToShoot = false;
+			animator.enabled = false;
 
-			GameObject bullet = Instantiate(bulletPrefab, transform.position, Quaternion.identity);
+			GameObject bullet = Instantiate(bulletPrefab, transform.position + new Vector3(0, bulletPositionOffSet, 0), Quaternion.identity);
 			Vector2 bulletDirection = (player.transform.position - transform.position).normalized;
 
 			bullet.GetComponent<Rigidbody2D>().velocity = bulletDirection * bulletSpeed;
-
 			bullet.name = "Bullet";
 
-			yield return new WaitForSeconds(bulletCooldown);
+			
 
-			readyToShoot = true;
+			LeanTween.value(gameObject, SquishEnemy, new Vector3(1f, 1f, 1f), new Vector3(0.9f, 1.3f, 1f), 0.1f).setEaseInBounce();
+			yield return new WaitForSeconds(0.1f);
+
+			LeanTween.value(gameObject, SquishEnemy, new Vector3(0.9f, 1.3f, 1f), new Vector3(1f, 1f, 1f), 0.1f).setEaseInBounce();
+
+			
+
+			//LeanTween.value(gameObject, SquishEnemy, new Vector3(0.85f, 1.15f, 1f), new Vector3(1.15f, 0.85f, 1f), 0.1f).setEase(LeanTweenType.easeInOutCubic);
+			//yield return new WaitForSeconds(0.1f);
+			//LeanTween.value(gameObject, SquishEnemy, new Vector3(1.15f, 0.85f, 1f), new Vector3(0.85f, 1.15f, 1f), 0.1f).setEase(LeanTweenType.easeInOutCubic);
+
 		}
+
+		yield return new WaitForSeconds(bulletCooldown);
+		animator.enabled = true;
+		readyToShoot = true;
+	}
+
+	void SquishEnemy(Vector3 val) {
+		gameObject.transform.localScale = val;
 	}
 
 	private void FlipSprite(Vector2 targetPos) {
