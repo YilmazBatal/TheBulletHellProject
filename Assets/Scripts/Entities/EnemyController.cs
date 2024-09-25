@@ -223,26 +223,18 @@ public class EnemyController : MonoBehaviour {
 	IEnumerator ShootBullet() {
 		if (readyToShoot) {
 			readyToShoot = false;
-			animator.enabled = false;
+			//animator.enabled = false;
 
 			GameObject bullet = Instantiate(bulletPrefab, transform.position + new Vector3(0, bulletPositionOffSet, 0), Quaternion.identity);
 			Vector2 bulletDirection = (player.transform.position - transform.position).normalized;
 
 			bullet.GetComponent<Rigidbody2D>().velocity = bulletDirection * bulletSpeed;
+			
 			bullet.name = "Bullet";
 
-			
-
-			LeanTween.value(gameObject, SquishEnemy, new Vector3(1f, 1f, 1f), new Vector3(0.9f, 1.3f, 1f), 0.1f).setEaseInBounce();
-			yield return new WaitForSeconds(0.1f);
-
-			LeanTween.value(gameObject, SquishEnemy, new Vector3(0.9f, 1.3f, 1f), new Vector3(1f, 1f, 1f), 0.1f).setEaseInBounce();
-
-			
-
-			//LeanTween.value(gameObject, SquishEnemy, new Vector3(0.85f, 1.15f, 1f), new Vector3(1.15f, 0.85f, 1f), 0.1f).setEase(LeanTweenType.easeInOutCubic);
-			//yield return new WaitForSeconds(0.1f);
-			//LeanTween.value(gameObject, SquishEnemy, new Vector3(1.15f, 0.85f, 1f), new Vector3(0.85f, 1.15f, 1f), 0.1f).setEase(LeanTweenType.easeInOutCubic);
+			LeanTween.value(gameObject, (val) => {
+				bullet.transform.localScale = val;
+			}, new Vector3(0f, 0f, 1f), new Vector3(1f, 1f, 1f), 0.25f).setEase(LeanTweenType.easeInOutCubic);
 
 		}
 
