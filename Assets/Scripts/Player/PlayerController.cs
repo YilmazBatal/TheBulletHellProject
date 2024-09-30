@@ -23,7 +23,7 @@ public class PlayerController : MonoBehaviour
 	#endregion
 	
 
-	void FixedUpdate() {
+	void Update() {
 		if (DialogueManager.GetInstance().dialogueIsPlaying) {
 			rb.velocity = Vector2.zero; // to prevent glitch
 			return;

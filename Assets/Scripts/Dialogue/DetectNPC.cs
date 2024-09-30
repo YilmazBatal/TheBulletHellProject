@@ -14,8 +14,6 @@ public class DetectNPC : MonoBehaviour
 	bool npcAvailable = false;
 	bool npcInRange = false;
 
-
-
 	#endregion
 
 
