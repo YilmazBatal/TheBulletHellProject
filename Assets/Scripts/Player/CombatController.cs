@@ -1,8 +1,16 @@
-using System;
+using System.Collections;
 using UnityEngine;
 
-public class WeaponController : MonoBehaviour {
+public class CombatController : MonoBehaviour {
 	#region Variables
+
+	[Header("Assign Data Manager")]
+	[SerializeField] private DataManager dataManager;
+
+	// Current Stats
+	private float attack;
+	private float hitPoint;
+	private float movementSpeed;
 
 	[Header("Player And Weapon Transform")]
 	[SerializeField] Transform player;
@@ -17,11 +25,17 @@ public class WeaponController : MonoBehaviour {
 	[SerializeField] float swingCooldown = 1f;
 	[SerializeField] float slashSpeed = 1f;
 	[SerializeField] float slashOffset = 1.5f;
+	[SerializeField] float swingAngle = 90;
 	float currentSwingTime;
 	bool canSwing = true;
+	bool isSwinging = false;
 
 
 	#endregion
+
+	private void Awake() {
+		UpdateStats();
+	}
 
 	private void Start() {
 		isFacingRight = (player.localScale.x == 1) ? true : false;
@@ -31,14 +45,22 @@ public class WeaponController : MonoBehaviour {
 		cursorPosition = Camera.main.ScreenToWorldPoint(Input.mousePosition);
 
 		ManagePlayerRotation();
-		ManageWeaponRotation();
+		if (!isSwinging) {
+			ManageWeaponRotation();
+		}
 		CheckForSwing();
+	}
+
+	void UpdateStats() {
+		attack = dataManager.playerData.BaseAttack;
+		hitPoint = dataManager.playerData.BaseHitPoints;
+		movementSpeed = dataManager.playerData.BaseMovementSpeed;
 	}
 
 	private void CheckForSwing() {
 		if (Input.GetMouseButton(0) && canSwing) {
 			Swing();
-			SwingAnimation(); 
+			StartCoroutine(SwingAnimation());
 			currentSwingTime = 0f;
 			canSwing = false;
 		}
@@ -47,8 +69,44 @@ public class WeaponController : MonoBehaviour {
 		canSwing = currentSwingTime >= swingCooldown; // otherwise false, this is called ternary operator -VERY COOL-
 	}
 
-	private void SwingAnimation() {
-		
+	private IEnumerator SwingAnimation() {
+		isSwinging= true;
+
+		Vector2 direction = cursorPosition - (Vector2)weapon.position;
+
+		float initialAngle = Mathf.Atan2(direction.y, direction.x) * Mathf.Rad2Deg;
+
+		// Create the start and end rotations as quaternions
+		Quaternion startRotation = Quaternion.Euler(0, 0, initialAngle + 90);
+		Quaternion endRotation = Quaternion.Euler(0, 0, initialAngle - 90);
+
+		float elapsedTime = 0f;
+		float duration = swingCooldown / 2f; // Duration for swinging to one side
+
+		while (elapsedTime < duration) {
+			weapon.rotation = Quaternion.Slerp(startRotation, endRotation, elapsedTime / duration);
+
+			elapsedTime += Time.deltaTime;
+			yield return null;
+		}
+
+
+		// Ensure it ends at the exact endAngle
+		weapon.rotation = endRotation;
+
+		elapsedTime = 0f;
+
+		while (elapsedTime < duration) {
+			weapon.rotation = Quaternion.Slerp(endRotation, startRotation, elapsedTime / duration);
+
+			elapsedTime += Time.deltaTime;
+			yield return null;
+		}
+
+		// Ensure it ends at the exact startAngle
+		weapon.rotation = startRotation;
+
+		isSwinging = false;
 	}
 
 	private void Swing() {
@@ -62,9 +120,12 @@ public class WeaponController : MonoBehaviour {
 
 		GameObject _slash = Instantiate(slashPrefab, spawnPosition, Quaternion.identity);
 		Rigidbody2D _slashRb = _slash.GetComponent<Rigidbody2D>();
+		SlashScript _slashScript = _slashRb.GetComponent<SlashScript>();
 
 		_slashRb.AddForce(direction * Vector2.one * slashSpeed, ForceMode2D.Impulse);
 		_slashRb.rotation = angle; // rigidbody
+
+		_slashScript.attack = attack;
 
 		Destroy(_slash, _slash.GetComponent<Animator>().GetCurrentAnimatorStateInfo(0).length - 0.1f);
 	}
@@ -83,7 +144,7 @@ public class WeaponController : MonoBehaviour {
 		Vector2 direction = cursorPosition - (Vector2)weapon.position;
 		float angle = Mathf.Atan2(direction.y, direction.x) * Mathf.Rad2Deg;
 		Quaternion rotation = Quaternion.AngleAxis(angle, Vector3.forward);
-		weapon.rotation = Quaternion.Slerp(weapon.rotation, rotation, 5f * Time.deltaTime);
+		weapon.rotation = Quaternion.Slerp(weapon.rotation, rotation, 20f);
 
 		// cursor at left of the player or right
 		if (cursorPosition.x <= player.position.x)

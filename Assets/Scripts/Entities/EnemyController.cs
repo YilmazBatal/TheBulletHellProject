@@ -12,6 +12,17 @@ public class EnemyController : MonoBehaviour {
 	}
 	private EnemyState enemyState;
 
+	// Enemy Data
+	private MobSO mobData;
+	private string mobName = "Slime";
+	private float mobAtk = 0f;
+	private float mobHp = 0f;
+
+	// Material
+	[Header("Material Settings")]
+	[SerializeField] private Material flashMaterial;
+	[HideInInspector] private Material defaultMaterial;
+
 	// Radiueses
 	[Header("Radius settings")]
 	[SerializeField] private float patrolRadius = 4f;
@@ -57,6 +68,11 @@ public class EnemyController : MonoBehaviour {
 
 	private void Awake() {
 		radiusCenter = transform.position;
+
+		defaultMaterial = GetComponent<SpriteRenderer>().material;
+
+
+		DefineData();
 	}
 	
 	private void Start() {
@@ -73,7 +89,16 @@ public class EnemyController : MonoBehaviour {
 		animator = GetComponent<Animator>();
 		playerAlert = transform.Find("PlayerAlert").gameObject;
 	}
+	
+	private void DefineData() {
+		mobData = Resources.Load<MobSO>("Datas/Mobs/" + mobName);
 
+		mobName = mobData.name;
+		mobAtk = mobData.attack;
+		mobHp = mobData.hp;
+		enemySpeed = mobData.movementSpeed;
+	}
+	
 	private void Update() {
 		// Set Enemy State
 		StateModifier();
@@ -97,9 +122,27 @@ public class EnemyController : MonoBehaviour {
 		}
 	}
 
-	float GetDistanceFromCenter(Transform entity) {
-		return Vector2.Distance(entity.position, radiusCenter);
+	bool isTakingDamage = false;
+
+	private void OnTriggerEnter2D(Collider2D collision) {
+		if (collision.CompareTag("PlayerBullet")) {
+
+			//isTakingDamage = false;
+			StartCoroutine(Flash());
+		}
 	}
+
+	private IEnumerator Flash() {
+		if (!isTakingDamage) {
+			print("Flashing");
+			isTakingDamage = true;
+			sr.material = flashMaterial;
+			yield return new WaitForSeconds(0.05f);
+			sr.material = defaultMaterial;
+			isTakingDamage = false;
+		}
+	}
+	#region States
 
 	void StateModifier() {
 		float distanceToPlayerFromCenter = GetDistanceFromCenter(player.transform);
@@ -119,9 +162,9 @@ public class EnemyController : MonoBehaviour {
 		} else {
 			enemyState = EnemyState.Idle;
 		}
-		Debug.LogWarning(enemyState.ToString());
+		//Debug.LogWarning(enemyState.ToString());
 	}
-
+	
 	IEnumerator ShowPlayerAlert() {
 		if (!didAlertPopUp) {
 			didAlertPopUp = true;
@@ -161,6 +204,8 @@ public class EnemyController : MonoBehaviour {
 					}
 
 					StopMoving();
+					
+					mobHp = mobData.hp;
 
 					// patrol timing
 					patrollingTime = Random.Range(minPatrol, maxPatrol);
@@ -243,9 +288,9 @@ public class EnemyController : MonoBehaviour {
 		readyToShoot = true;
 	}
 
-	void SquishEnemy(Vector3 val) {
-		gameObject.transform.localScale = val;
-	}
+	#endregion
+
+	#region Functions
 
 	private void FlipSprite(Vector2 targetPos) {
 		// Flip the enemy by cheking target pos
@@ -264,6 +309,12 @@ public class EnemyController : MonoBehaviour {
 		animator.SetBool("isMoving", isMoving);
 		rb.velocity = direction * enemySpeed; // Set the velocity
 	}
+
+	float GetDistanceFromCenter(Transform entity) {
+		return Vector2.Distance(entity.position, radiusCenter);
+	}
+	
+	#endregion
 
 	void OnDrawGizmosSelected() {
 		Gizmos.color = new Color(0.9f, 0.2f, 0.2f, 0.5f);

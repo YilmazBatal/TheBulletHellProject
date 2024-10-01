@@ -27,7 +27,7 @@ Transform:
   m_GameObject: {fileID: 1707671058476382614}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0, y: 0.5, z: 0}
+  m_LocalPosition: {x: 0, y: 1, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -132,8 +132,8 @@ Transform:
   m_GameObject: {fileID: 4526768900511465828}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: -1, z: 0}
-  m_LocalScale: {x: 1.125, y: 1.125, z: 1}
+  m_LocalPosition: {x: 0, y: -0.75, z: 0}
+  m_LocalScale: {x: 1.25, y: 1.25, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 5477594919751758996}
@@ -179,7 +179,7 @@ SpriteRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 2
-  m_Sprite: {fileID: 21300000, guid: 15c0c47614e57954c8094eb7d5dbbe0f, type: 3}
+  m_Sprite: {fileID: 21300000, guid: 023d3116cfd66d94fba1d96297dcb293, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
@@ -385,14 +385,15 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 89b74aa657b96f241923effea88751ef, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  patrolRadius: 4
-  pursuingRadius: 8
-  minPatrol: 2.5
-  maxPatrol: 5
+  patrolRadius: 5
+  pursuingRadius: 10
+  minPatrol: 1
+  maxPatrol: 3
   enemySpeed: 2.5
   alertSize: 3
   alertTime: 0.25
-  attackOffSet: 3
+  attackOffSet: 6
+  bulletPositionOffSet: -0.4
   bulletPrefab: {fileID: 538378091599737335, guid: c6b5949f485386a40b20b62a13417d71, type: 3}
   bulletSpeed: 8
-  bulletCooldown: 0.3
+  bulletCooldown: 0.6
