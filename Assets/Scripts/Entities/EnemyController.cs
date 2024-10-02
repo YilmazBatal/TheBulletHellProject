@@ -1,4 +1,5 @@
 using System.Collections;
+using Unity.VisualScripting;
 using UnityEngine;
 
 public class EnemyController : MonoBehaviour {
@@ -51,6 +52,8 @@ public class EnemyController : MonoBehaviour {
 	[SerializeField] GameObject bulletPrefab;
 	[SerializeField] float bulletSpeed = 10f;
 	[SerializeField] float bulletCooldown = 1.3f;
+	[SerializeField] float enemyAimOffSet;
+	[SerializeField] float recoilStrength = 2;
 	private bool readyToShoot = false;
 
 	// Coroutines
@@ -270,23 +273,34 @@ public class EnemyController : MonoBehaviour {
 			readyToShoot = false;
 			//animator.enabled = false;
 
+			float bulletDirectionOffSet = Random.Range(enemyAimOffSet * -1, enemyAimOffSet); // to give recoil effect
 			GameObject bullet = Instantiate(bulletPrefab, transform.position + new Vector3(0, bulletPositionOffSet, 0), Quaternion.identity);
-			Vector2 bulletDirection = (player.transform.position - transform.position).normalized;
+			Vector3 enemyAim = player.transform.position + new Vector3(bulletDirectionOffSet, bulletDirectionOffSet, 0);
+			Vector2 bulletDirection = (enemyAim - transform.position + new Vector3(0, bulletPositionOffSet, 0)).normalized;
 
 			bullet.GetComponent<Rigidbody2D>().velocity = bulletDirection * bulletSpeed;
 			
 			bullet.name = "Bullet";
 
-			LeanTween.value(gameObject, (val) => {
+			LeanTween.value(bullet, (val) => {
 				bullet.transform.localScale = val;
-			}, new Vector3(0f, 0f, 1f), new Vector3(1f, 1f, 1f), 0.25f).setEase(LeanTweenType.easeInOutCubic);
+			}, new Vector3(0f, 0f, 1f), new Vector3(1f, 1f, 1f), 0.35f).setEase(LeanTweenType.easeOutBack);
 
+
+			//after shooting make the enemy recoil
+			
+			rb.AddForce((bulletDirection * -1) * recoilStrength, ForceMode2D.Impulse);
 		}
 
 		yield return new WaitForSeconds(bulletCooldown);
 		animator.enabled = true;
 		readyToShoot = true;
 	}
+
+	IEnumerator EnemyRecoil() {
+		yield return null;
+	}
+
 
 	#endregion
 

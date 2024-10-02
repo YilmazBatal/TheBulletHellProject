@@ -3759,6 +3759,10 @@ PrefabInstance:
       propertyPath: bulletCooldown
       value: 1
       objectReference: {fileID: 0}
+    - target: {fileID: 7165575709822839662, guid: 15cac5457b2e8c94ca2608dd967d4e5c, type: 3}
+      propertyPath: enemyAimOffSet
+      value: 1
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
