@@ -1,5 +1,6 @@
 using System.Collections;
 using Unity.VisualScripting;
+using UnityEditor.Experimental.GraphView;
 using UnityEngine;
 
 public class EnemyController : MonoBehaviour {
@@ -44,6 +45,7 @@ public class EnemyController : MonoBehaviour {
 	[SerializeField] float alertTime = 0.5f;
 	[SerializeField] float attackOffSet = 3f;
 	[SerializeField] float bulletPositionOffSet = -1f;
+	[SerializeField] float recoilDuration = 4f;
 	private bool isMoving = false;
 	private bool didAlertPopUp = false;
 
@@ -288,8 +290,10 @@ public class EnemyController : MonoBehaviour {
 
 
 			//after shooting make the enemy recoil
-			
+
+
 			rb.AddForce((bulletDirection * -1) * recoilStrength, ForceMode2D.Impulse);
+			StartCoroutine(ApplyKnockbackOnShooting((bulletDirection * -1), recoilStrength, recoilDuration));
 		}
 
 		yield return new WaitForSeconds(bulletCooldown);
@@ -297,8 +301,22 @@ public class EnemyController : MonoBehaviour {
 		readyToShoot = true;
 	}
 
-	IEnumerator EnemyRecoil() {
-		yield return null;
+	public IEnumerator ApplyKnockbackOnShooting(Vector2 bulletDir, float force, float duration) {
+		float elapsedTime = 0f;
+
+		// Apply init force
+		rb.AddForce(bulletDir * force, ForceMode2D.Impulse); 
+
+		// Gradually decrease the velocity
+		while (elapsedTime < duration) {
+			elapsedTime += Time.deltaTime;
+
+			rb.velocity = Vector2.Lerp(rb.velocity, Vector2.zero, elapsedTime / duration);
+
+			yield return null;
+		}
+
+		rb.velocity = Vector2.zero;
 	}
 
 
