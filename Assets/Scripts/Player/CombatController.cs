@@ -122,7 +122,7 @@ public class CombatController : MonoBehaviour {
 		Rigidbody2D _slashRb = _slash.GetComponent<Rigidbody2D>();
 		SlashScript _slashScript = _slashRb.GetComponent<SlashScript>();
 
-		_slashRb.AddForce(direction * Vector2.one * slashSpeed, ForceMode2D.Impulse);
+		_slashRb.AddForce(direction.normalized * Vector2.one * slashSpeed, ForceMode2D.Impulse);
 		_slashRb.rotation = angle; // rigidbody
 
 		_slashScript.attack = attack;

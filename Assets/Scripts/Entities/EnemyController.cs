@@ -24,6 +24,7 @@ public class EnemyController : MonoBehaviour {
 	[Header("Material Settings")]
 	[SerializeField] private Material flashMaterial;
 	[HideInInspector] private Material defaultMaterial;
+	[SerializeField] private float flashDuration = 0.1f;
 
 	// Radiueses
 	[Header("Radius settings")]
@@ -48,6 +49,11 @@ public class EnemyController : MonoBehaviour {
 	[SerializeField] float recoilDuration = 4f;
 	private bool isMoving = false;
 	private bool didAlertPopUp = false;
+
+	[SerializeField] float knockBackStrength = 3f;
+	[SerializeField] float knockBackDuration = 1f;
+
+	bool isKnockedBack;
 
 	// Bullet Settings
 	[Header("Bullet Settings")]
@@ -131,9 +137,15 @@ public class EnemyController : MonoBehaviour {
 
 	private void OnTriggerEnter2D(Collider2D collision) {
 		if (collision.CompareTag("PlayerBullet")) {
+			Vector2 hitDirection = (transform.position - collision.transform.position).normalized;
+
 
 			//isTakingDamage = false;
 			StartCoroutine(Flash());
+
+
+			StartCoroutine(ApplyKnockback(hitDirection, knockBackStrength, knockBackDuration));
+
 		}
 	}
 
@@ -142,7 +154,7 @@ public class EnemyController : MonoBehaviour {
 			print("Flashing");
 			isTakingDamage = true;
 			sr.material = flashMaterial;
-			yield return new WaitForSeconds(0.05f);
+			yield return new WaitForSeconds(flashDuration);
 			sr.material = defaultMaterial;
 			isTakingDamage = false;
 		}
@@ -292,16 +304,19 @@ public class EnemyController : MonoBehaviour {
 			//after shooting make the enemy recoil
 
 
-			rb.AddForce((bulletDirection * -1) * recoilStrength, ForceMode2D.Impulse);
-			StartCoroutine(ApplyKnockbackOnShooting((bulletDirection * -1), recoilStrength, recoilDuration));
+			//rb.AddForce((bulletDirection * -1) * recoilStrength, ForceMode2D.Impulse);
+			StartCoroutine(ApplyKnockback((bulletDirection * -1), recoilStrength, recoilDuration));
 		}
 
 		yield return new WaitForSeconds(bulletCooldown);
 		animator.enabled = true;
 		readyToShoot = true;
 	}
+	private Vector2 combinedKnockback = Vector2.zero;
+	public IEnumerator ApplyKnockback(Vector2 bulletDir, float force, float duration) {
+		combinedKnockback += bulletDir * force;
 
-	public IEnumerator ApplyKnockbackOnShooting(Vector2 bulletDir, float force, float duration) {
+
 		float elapsedTime = 0f;
 
 		// Apply init force
@@ -311,14 +326,13 @@ public class EnemyController : MonoBehaviour {
 		while (elapsedTime < duration) {
 			elapsedTime += Time.deltaTime;
 
-			rb.velocity = Vector2.Lerp(rb.velocity, Vector2.zero, elapsedTime / duration);
+			rb.velocity = Vector2.Lerp(combinedKnockback, Vector2.zero, elapsedTime / duration);
 
 			yield return null;
 		}
 
-		rb.velocity = Vector2.zero;
+		combinedKnockback = Vector2.zero;
 	}
-
 
 	#endregion
 

@@ -3748,20 +3748,12 @@ PrefabInstance:
       value: EnemyTest
       objectReference: {fileID: 0}
     - target: {fileID: 7165575709822839662, guid: 15cac5457b2e8c94ca2608dd967d4e5c, type: 3}
-      propertyPath: bulletSpeed
-      value: 6
+      propertyPath: recoilStrength
+      value: 3
       objectReference: {fileID: 0}
     - target: {fileID: 7165575709822839662, guid: 15cac5457b2e8c94ca2608dd967d4e5c, type: 3}
-      propertyPath: flashMaterial
-      value: 
-      objectReference: {fileID: 2100000, guid: 19a9abb883540be48b75b951a927ae03, type: 3}
-    - target: {fileID: 7165575709822839662, guid: 15cac5457b2e8c94ca2608dd967d4e5c, type: 3}
-      propertyPath: bulletCooldown
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 7165575709822839662, guid: 15cac5457b2e8c94ca2608dd967d4e5c, type: 3}
-      propertyPath: enemyAimOffSet
-      value: 1
+      propertyPath: knockBackStrength
+      value: 5
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -5104,7 +5096,7 @@ Transform:
   m_GameObject: {fileID: 519420028}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -4.1083674, y: 4.5, z: -10}
+  m_LocalPosition: {x: -4.108013, y: 4.5, z: -10}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -13769,7 +13761,7 @@ GameObject:
   m_Component:
   - component: {fileID: 666332954}
   m_Layer: 0
-  m_Name: Manager
+  m_Name: Managers
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -78978,6 +78970,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3b11709e6c099c64bbd998167dc8e175, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  cursorTexture: {fileID: 2800000, guid: 28a638bf45e75d74e82ea50e4556566d, type: 3}
 --- !u!1 &2035460179
 GameObject:
   m_ObjectHideFlags: 0
@@ -79693,6 +79686,10 @@ PrefabInstance:
     - target: {fileID: 2808359264381705805, guid: 2e6a93a74a6ac0047a1c5f7bdafa30a3, type: 3}
       propertyPath: m_Name
       value: Player
+      objectReference: {fileID: 0}
+    - target: {fileID: 5759064137016390076, guid: 2e6a93a74a6ac0047a1c5f7bdafa30a3, type: 3}
+      propertyPath: slashSpeed
+      value: 10
       objectReference: {fileID: 0}
     - target: {fileID: 5759064137016390076, guid: 2e6a93a74a6ac0047a1c5f7bdafa30a3, type: 3}
       propertyPath: dataManager

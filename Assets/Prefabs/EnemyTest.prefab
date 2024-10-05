@@ -385,6 +385,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 89b74aa657b96f241923effea88751ef, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  flashMaterial: {fileID: 2100000, guid: 19a9abb883540be48b75b951a927ae03, type: 3}
   patrolRadius: 5
   pursuingRadius: 10
   minPatrol: 1
@@ -394,6 +395,9 @@ MonoBehaviour:
   alertTime: 0.25
   attackOffSet: 6
   bulletPositionOffSet: -0.4
+  recoilDuration: 0.5
   bulletPrefab: {fileID: 538378091599737335, guid: c6b5949f485386a40b20b62a13417d71, type: 3}
-  bulletSpeed: 8
-  bulletCooldown: 0.6
+  bulletSpeed: 6
+  bulletCooldown: 1
+  enemyAimOffSet: 1
+  recoilStrength: 1
