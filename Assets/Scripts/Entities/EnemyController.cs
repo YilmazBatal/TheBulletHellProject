@@ -1,6 +1,4 @@
 using System.Collections;
-using Unity.VisualScripting;
-using UnityEditor.Experimental.GraphView;
 using UnityEngine;
 
 public class EnemyController : MonoBehaviour {
@@ -47,6 +45,7 @@ public class EnemyController : MonoBehaviour {
 	[SerializeField] float attackOffSet = 3f;
 	[SerializeField] float bulletPositionOffSet = -1f;
 	[SerializeField] float recoilDuration = 4f;
+	private Vector2 combinedKnockback = Vector2.zero;
 	private bool isMoving = false;
 	private bool didAlertPopUp = false;
 
@@ -139,26 +138,13 @@ public class EnemyController : MonoBehaviour {
 		if (collision.CompareTag("PlayerBullet")) {
 			Vector2 hitDirection = (transform.position - collision.transform.position).normalized;
 
-
-			//isTakingDamage = false;
 			StartCoroutine(Flash());
-
 
 			StartCoroutine(ApplyKnockback(hitDirection, knockBackStrength, knockBackDuration));
 
 		}
 	}
 
-	private IEnumerator Flash() {
-		if (!isTakingDamage) {
-			print("Flashing");
-			isTakingDamage = true;
-			sr.material = flashMaterial;
-			yield return new WaitForSeconds(flashDuration);
-			sr.material = defaultMaterial;
-			isTakingDamage = false;
-		}
-	}
 	#region States
 
 	void StateModifier() {
@@ -312,8 +298,8 @@ public class EnemyController : MonoBehaviour {
 		animator.enabled = true;
 		readyToShoot = true;
 	}
-	private Vector2 combinedKnockback = Vector2.zero;
-	public IEnumerator ApplyKnockback(Vector2 bulletDir, float force, float duration) {
+	
+	IEnumerator ApplyKnockback(Vector2 bulletDir, float force, float duration) {
 		combinedKnockback += bulletDir * force;
 
 
@@ -337,6 +323,16 @@ public class EnemyController : MonoBehaviour {
 	#endregion
 
 	#region Functions
+
+	private IEnumerator Flash() {
+		if (!isTakingDamage) {
+			isTakingDamage = true;
+			sr.material = flashMaterial;
+			yield return new WaitForSeconds(flashDuration);
+			sr.material = defaultMaterial;
+			isTakingDamage = false;
+		}
+	}
 
 	private void FlipSprite(Vector2 targetPos) {
 		// Flip the enemy by cheking target pos

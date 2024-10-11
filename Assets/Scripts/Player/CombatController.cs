@@ -30,6 +30,7 @@ public class CombatController : MonoBehaviour {
 	bool canSwing = true;
 	bool isSwinging = false;
 
+	
 
 	#endregion
 
@@ -39,6 +40,7 @@ public class CombatController : MonoBehaviour {
 
 	private void Start() {
 		isFacingRight = (player.localScale.x == 1) ? true : false;
+
 	}
 
 	void Update() {
@@ -165,6 +167,7 @@ public class CombatController : MonoBehaviour {
 
 	void FlipPlayer(float val) {
 		player.localScale = new Vector3(val, 1, 1);
-
 	}
+
+	
 }
